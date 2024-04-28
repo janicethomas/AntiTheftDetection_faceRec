@@ -10,7 +10,7 @@ import firebase_admin
 from firebase_admin import credentials, db, firestore
 
 
-cred = credentials.Certificate('./anti-theft-detection-2d6d8-firebase-adminsdk-o8arg-5862fffb5c.json')
+cred = credentials.Certificate('./anti-theft-detection-2d6d8-firebase-adminsdk.json')
 default_app = firebase_admin.initialize_app(cred)
 
 db = firestore.client()
