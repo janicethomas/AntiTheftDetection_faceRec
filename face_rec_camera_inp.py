@@ -140,7 +140,7 @@ def faceRecognition():
         names = pickle.load(f)
 
     cond = 1
-    while cond:
+    while cond == 1:
 
         ret, img =cam.read()
 
@@ -154,12 +154,15 @@ def faceRecognition():
            )
 
         for(x,y,w,h) in faces:
+            if cond == 0:
+                break
 
             cv2.rectangle(img, (x,y), (x+w,y+h), (0,255,0), 2)
 
             id, confidence = recognizer.predict(gray[y:y+h,x:x+w])
 
-            # Check if confidence is less them 100 ==> "0" is perfect match 
+            # Check if confidence is less them 100 ==> "0" is perfect match
+            print(confidence)
             if (confidence > 70):
                 id = names[id]
                 confidence = "  {0}%".format(round(confidence))
@@ -188,32 +191,33 @@ def faceRecognition():
                     doc_ref2.document(doc.id).set({"alarmOn" : "true"}, merge = True)
                     time.sleep(3)
                     doc_ref2.document(doc.id).set({"alarmOn" : "false"}, merge = True)
-                
                 cond = 0
+                break
             else:
                 docs = (
                     doc_ref
-                    .where("name", "==", "unknown")
+                    .where("name", "==", "Janice")
                     .stream()
                 )
                 for doc in docs:
-                    doc_ref.document(doc.id).set({"arrivedTime" : datetime.now(), "canAccess" : False}, merge = True)
-                
-                docs = (
-                    doc_ref2
-                    .where("alarmOn", "==", "false")
-                    .stream()
-                )
-                for doc in docs:
-                    doc_ref2.document(doc.id).set({"alarmOn" : "true"}, merge = True)
-                    time.sleep(3)
-                    doc_ref2.document(doc.id).set({"alarmOn" : "false"}, merge = True)
+                    doc_ref.document(doc.id).set({"arrivedTime" : datetime.now()}, merge = True)
                 cond = 0
+                break
+
+                # docs = (
+                #     doc_ref2
+                #     .where("alarmOn", "==", "false")
+                #     .stream()
+                # )
+                # for doc in docs:
+                #     doc_ref2.document(doc.id).set({"alarmOn" : "true"}, merge = True)
+                #     time.sleep(3)
+                #     doc_ref2.document(doc.id).set({"alarmOn" : "false"}, merge = True)
+                
 
 
 
         cv2.imshow('camera',img) 
-
         k = cv2.waitKey(10) & 0xff # Press 'ESC' for exiting video
         if k == 27:
             break
@@ -225,12 +229,12 @@ def faceRecognition():
 
 def setCameraFalse():
     docs = (
-        doc_ref
+        doc_ref2
         .where("cameraOn", "==", "true")
         .stream()
     )
     for doc in docs:
-        doc_ref.document(doc.id).set({"cameraOn":"false"}, merge = True)
+        doc_ref2.document(doc.id).set({"cameraOn":"false"}, merge = True)
 
 
 def main():
@@ -244,7 +248,6 @@ def main():
             if doc.to_dict()['cameraOn'] == 'true':
                 faceRecognition()
                 setCameraFalse()
-                
 
 
 main()
